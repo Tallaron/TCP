@@ -1,0 +1,18 @@
+package de.tallaron.tcp;
+
+abstract public class SettingsExample {
+
+    public static final String KRAKEN_BASE_URL = "https://api.twitch.tv/kraken/";
+    public static final String CLIENT_ID = "";
+    public static final String CLIENT_SECRET = "";
+    public static final String REDIRECT_URL = "http://127.0.0.1:27779";
+    public static final String SUCCESS_PAGE = "http://127.0.0.1/test/success.php";
+    public static final String ERROR_PAGE = "http://127.0.0.1/test/error.php";
+
+    
+    public static final boolean FORCE_VERIFY = false;
+    
+    
+    public static final long DEFAULT_HTTP_TIMEOUT = 5000L;
+    
+}
