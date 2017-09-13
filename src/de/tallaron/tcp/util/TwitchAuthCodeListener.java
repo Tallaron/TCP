@@ -17,7 +17,6 @@ import javafx.application.Platform;
 public class TwitchAuthCodeListener implements Runnable {
     
     private TwitchController tc;
-    private long start;
 
     public TwitchAuthCodeListener(TwitchController tc) {
         this.tc = tc;

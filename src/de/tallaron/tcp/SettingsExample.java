@@ -1,5 +1,12 @@
 package de.tallaron.tcp;
 
+/**
+ * 
+ * @author Tallaron
+ * This class just represents the settings class which includes some private
+ * credentials. For usage, rename this class to Settings and fill out the missing fields.
+ */
+
 abstract public class SettingsExample {
 
     public static final String KRAKEN_BASE_URL = "https://api.twitch.tv/kraken/";

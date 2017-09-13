@@ -33,6 +33,7 @@ public class ChannelController {
         c.setUrl( data.get("url").toString() );
         c.setViews(Integer.parseInt( data.get("views").toString() ));
         c.setStatusCollection(loadStatusCollection(c));
+        c.addStatus( new Status( c.getStatus() ) );
         return c;
     }
 
@@ -50,9 +51,9 @@ public class ChannelController {
         } return null;
     }
     
-    public static JSONObject changeStatus(String status, TwitchController tc) {
+    public static JSONObject changeStatus(Status status, TwitchController tc) {
         try {
-            String response = Request.Put(KRAKEN_BASE_URL+"channels/"+tc.getUser().getId()+"?channel[status]="+URLEncoder.encode(status, "UTF-8"))
+            String response = Request.Put(KRAKEN_BASE_URL+"channels/"+tc.getUser().getId()+"?channel[status]="+URLEncoder.encode(status.getStatus(), "UTF-8"))
                     .addHeader("Accept", "application/vnd.twitchtv.v5+json")
                     .addHeader("Authorization", "OAuth " + tc.getAuthToken())
                     .addHeader("Client-ID", CLIENT_ID)
@@ -72,6 +73,15 @@ public class ChannelController {
     
     public static void removeStatusFromCollection(Status s, TwitchController tc) {
         tc.getChannel().removeStatus(s);
+        saveStatusCollection(tc.getChannel());
+        tc.getApp().updateChannel();
+    }
+    
+    public static void updateStatus(Status s, TwitchController tc, String newStatus) {
+        tc.getChannel().getStatusCollection()
+            .stream()
+            .filter((e) -> e.equals(s))
+            .forEach((e) -> e.setStatus(newStatus));
         saveStatusCollection(tc.getChannel());
         tc.getApp().updateChannel();
     }

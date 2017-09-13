@@ -30,14 +30,16 @@ public class ChannelStatusListItem {
         box.setPadding(new Insets(5));
         StackPane nodeStack = new StackPane();
         
-        TCPCaller toggleVisibility = () -> nodeStack.getChildren().forEach( (e) -> e.setVisible(!e.isVisible()) );
-        TCPCaller deleteStatus = () -> ChannelController.removeStatusFromCollection(s, tc);
-        
         Label normField = new Label(s.toString());
         TextField editField = new TextField(s.toString());
+
+        TCPCaller toggleVisibility = () -> nodeStack.getChildren().forEach( (e) -> e.setVisible(!e.isVisible()) ); //ListItem Scope
+        TCPCaller deleteStatus = () -> ChannelController.removeStatusFromCollection(s, tc); //Object Scope
+        TCPCaller updateStatus = () -> ChannelController.updateStatus(s, tc, editField.getText()); //Object Scope
+        TCPCaller selectStatus = () -> tc.changeChannelStatus(s); //Twitch Scope
         
         HBox norm = new HBox(
-            createButton(tc, "+", true, () -> System.out.println("SELECT")),
+            createButton(tc, "+", true, selectStatus),
             createNode(normField),
             createButton(tc, "E", true, toggleVisibility),
             createButton(tc, "D", true, deleteStatus)
@@ -49,7 +51,7 @@ public class ChannelStatusListItem {
         HBox edit = new HBox(
             createButton(tc, "", false, () -> {}),
             createNode(editField),
-            createButton(tc, "S", true, () -> System.out.println("SAVE")),
+            createButton(tc, "S", true, updateStatus),
             createButton(tc, "X", true, toggleVisibility)
         );
         edit.setPadding(new Insets(0,0,0,0));

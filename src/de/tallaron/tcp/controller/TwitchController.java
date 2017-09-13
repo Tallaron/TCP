@@ -4,7 +4,9 @@ import de.tallaron.tcp.App;
 import java.io.IOException;
 import static de.tallaron.tcp.Settings.*;
 import de.tallaron.tcp.entity.Channel;
+import de.tallaron.tcp.entity.Status;
 import de.tallaron.tcp.entity.User;
+import de.tallaron.tcp.util.IRCSession;
 import de.tallaron.tcp.util.TwitchAccessTokenListener;
 import de.tallaron.tcp.util.TwitchAuthCodeListener;
 
@@ -40,16 +42,20 @@ public class TwitchController {
         new Thread( new TwitchAccessTokenListener(this) ).start();
     }
     
+    public void startIRCSession() {
+        new Thread( new IRCSession(this) ).start();
+    }
     
     public void loadUserData() {
         setUser( UserController.createObj(this) );
+        startIRCSession();
     }
     
     public void loadChannelData() {
         setChannel( ChannelController.createObj(this) );
     }
     
-    public void changeChannelStatus(String status) {
+    public void changeChannelStatus(Status status) {
         ChannelController.changeStatus(status, this);
         app.updateChannel();
     }

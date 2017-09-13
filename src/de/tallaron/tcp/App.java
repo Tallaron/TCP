@@ -8,7 +8,7 @@ package de.tallaron.tcp;
 import de.tallaron.tcp.controller.TwitchController;
 import de.tallaron.tcp.ui.ConnectButton;
 import de.tallaron.tcp.menu.NavMenu;
-import de.tallaron.tcp.ui.ChannelStatusPane;
+import de.tallaron.tcp.ui.ChatPane;
 import de.tallaron.tcp.ui.ContentPane;
 import de.tallaron.tcp.ui.DisconnectButton;
 import de.tallaron.tcp.ui.ToggleButton;
@@ -18,9 +18,11 @@ import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -45,8 +47,7 @@ public class App extends Application {
     private final TitledPane USER_INFO_PANE = ContentPane.getNode("User Info");
     private final TitledPane CHANNEL_INFO_PANE = ContentPane.getNode("Channel::Info");
     private final TitledPane CHANNEL_STATUS_PANE = ContentPane.getNode("Channel::Status");
-//    private final TitledPane CHANNEL_STATUS_PANE = ChannelStatusPane.getNode(this.getTc(), "Channel::Status");
-    private final TitledPane CHAT_PANE = ContentPane.getNode("Chat");
+    private final TitledPane CHAT_PANE = ChatPane.getNode("Chat");
     //RIGHT
     private final TitledPane USERS_PANE = UserPane.getNode("Users", false);
     //BOTTOM
@@ -169,7 +170,14 @@ public class App extends Application {
         loadChannel();
     }
     
-    
+    public void updateChat(String line) {
+        if(line != null) {
+            Label newLine = new Label(line);
+//            newLine.setMaxWidth(450);
+            newLine.setWrapText(true);
+            ((VBox)CHAT_PANE.getContent()).getChildren().add( newLine );
+        }
+    }
     
     private void init_tc() {
         tc.setApp(this);
