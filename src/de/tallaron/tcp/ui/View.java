@@ -7,6 +7,7 @@ import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -22,7 +23,7 @@ public class View {
         grid.setVgap(5);
         
         grid.add(new Label("Name:"), 0, 0);
-        grid.add(new Label(u.getName()+ " (ID: "+u.getId()+")"), 1, 0);
+        grid.add(new Label(u.getDisplayName()+ " (ID: "+u.getId()+")"), 1, 0);
         
         grid.add(new Label("EMail:"), 0, 1);
         grid.add(new Label(u.getEmail()), 1, 1);
@@ -76,13 +77,8 @@ public class View {
         pane.setContent(grid);
     }
     
-    public static void drawChannelStatus(TitledPane pane, TwitchController tc) {
-        pane.setContent(
-            new VBox(
-                ChannelStatusAddForm.getNode(tc),
-                ChannelStatusList.getNode(tc)
-            )
-        );
+    public static void drawChannelStatus(ChannelStatusPane csp, TwitchController tc) {
+        csp.getSp().setContent(ChannelStatusList.getNode(tc));
     }
     
     

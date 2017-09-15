@@ -2,34 +2,56 @@ package de.tallaron.tcp.ui;
 
 import de.tallaron.tcp.controller.TwitchController;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-public abstract class ChannelStatusPane {
+public class ChannelStatusPane {
+    
+    TitledPane tp = null;
+    ScrollPane sp = null;
 
-    public static TitledPane getNode(TwitchController tc) {
-        return getNode(tc, null);
-    }
-    
-    public static TitledPane getNode(TwitchController tc, String title) {
-        return getNode(tc, title, true);
-    }
-    
-    public static TitledPane getNode(TwitchController tc, String title, boolean enabled) {
-        TitledPane pane = new TitledPane();
-        VBox vbox = new VBox();
-        vbox.getChildren().addAll(
-            ChannelStatusAddForm.getNode(tc),
-            ChannelStatusList.getNode(tc)
-        );
+    public ChannelStatusPane(String title, boolean enabled, TwitchController tc) {
+        tp = new TitledPane();
+
+        sp = new ScrollPane( new VBox());
+        sp.setFitToWidth(true);
+
+        VBox wrapper = new VBox( ChannelStatusAddForm.getNode(tc), sp );
+        wrapper.setSpacing(5);
+        VBox.setVgrow(sp, Priority.ALWAYS);
         
-        pane.setText(title != null ? title : "");
-        pane.setPadding(new Insets(5));
-        pane.setCollapsible(false);
-        pane.setMinHeight(250);
-        pane.setDisable(!enabled);
-        pane.setContent(vbox);
-        return pane;
+        tp.setText(title != null ? title : "");
+        tp.setPadding(new Insets(5));
+        tp.setCollapsible(false);
+        tp.setMinHeight(250);
+        tp.setDisable(!enabled);
+        tp.setContent(wrapper);
     }
+    
+    public Node getNode() {
+        return tp;   
+    }
+
+    public TitledPane getTp() {
+        return tp;
+    }
+
+    public void setTp(TitledPane tp) {
+        this.tp = tp;
+    }
+
+    public ScrollPane getSp() {
+        return sp;
+    }
+
+    public void setSp(ScrollPane sp) {
+        this.sp = sp;
+    }
+    
+    
     
 }

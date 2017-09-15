@@ -18,6 +18,7 @@ public class TwitchController {
     private App app;
     private User user;
     private Channel channel;
+    private IRCSession ircSession = null;
 
     public void auth() {
         String url = KRAKEN_BASE_URL + "oauth2/authorize"
@@ -43,11 +44,28 @@ public class TwitchController {
     }
     
     public void startIRCSession() {
-        new Thread( new IRCSession(this) ).start();
+        setIrcSession( new IRCSession(this) );
+        Thread deamonIRC = new Thread( getIrcSession() );
+        deamonIRC.setDaemon(true);
+        deamonIRC.start();
+    }
+    
+    public void stopIRCSession() {
+        if(getIrcSession() != null)
+            getIrcSession().diconnect();
+    }
+    
+    public void sendChatMessage(String msg) {
+        if(getIrcSession() != null) {
+            try {
+                getIrcSession().sendMessage(msg);
+            } catch(IOException ignored) {
+            }
+        }
     }
     
     public void loadUserData() {
-        setUser( UserController.createObj(this) );
+        setUser( UserMapper.createObj(this) );
         startIRCSession();
     }
     
@@ -108,6 +126,15 @@ public class TwitchController {
         this.channel = channel;
     }
 
+    public IRCSession getIrcSession() {
+        return ircSession;
+    }
+
+    public void setIrcSession(IRCSession ircSession) {
+        this.ircSession = ircSession;
+    }
+
+    
     
 
 }

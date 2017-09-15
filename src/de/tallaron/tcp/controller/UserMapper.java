@@ -7,7 +7,7 @@ import java.io.IOException;
 import org.apache.http.client.fluent.Request;
 import org.json.simple.JSONValue;
 
-public class UserController {
+public class UserMapper {
     
     
     
@@ -15,7 +15,8 @@ public class UserController {
         JSONObject data = loadData( tc.getAuthToken() );
         User u = new User();
         u.setId( Integer.parseInt(data.get("_id").toString()) );
-        u.setName( data.get("display_name").toString() );
+        u.setDisplayName( data.get("display_name").toString() );
+        u.setName( data.get("name").toString() );
         u.setEmail( data.get("email").toString() );
         u.setBio( data.get("bio").toString() );
         return u;

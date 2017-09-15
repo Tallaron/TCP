@@ -24,7 +24,7 @@ public abstract class DisconnectButton {
         box.setPrefHeight(40);
         box.setSpacing(5);
 
-        currentUserLabel.setText("User: "+app.getTc().getUser().getName());
+        currentUserLabel.setText("User: "+app.getTc().getUser().getDisplayName());
         btnDisconnect.setOnAction(new  EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {

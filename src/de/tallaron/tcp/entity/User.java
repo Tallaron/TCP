@@ -4,17 +4,18 @@ package de.tallaron.tcp.entity;
 public class User {
     
     private int id;
+    private String displayName;
     private String name;
     private String type;
     private String bio;
     private String email;
 
-    public String getName() {
-        return name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public int getId() {
@@ -48,9 +49,13 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
-    
-    
-    
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     
 }

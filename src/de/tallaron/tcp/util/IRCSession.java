@@ -3,6 +3,7 @@ package de.tallaron.tcp.util;
 
 import de.tallaron.tcp.Settings;
 import de.tallaron.tcp.controller.TwitchController;
+import de.tallaron.tcp.ui.ChatLine;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -18,83 +19,121 @@ import javafx.application.Platform;
 public class IRCSession implements Runnable {
     
     private TwitchController tc;
+    private Socket socket = null;
+    private BufferedReader reader = null;
+    private BufferedWriter writer = null;
+    private boolean connected = true;
 
     public IRCSession(TwitchController tc) {
         this.tc = tc;
+        try {
+            socket = new Socket(Settings.IRC_SERVER, Settings.IRC_PORT);
+            writer = new BufferedWriter( new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
+            reader = new BufferedReader( new InputStreamReader(socket.getInputStream(), "UTF-8"));
+        } catch(IOException ignored) {
+            
+        }
     }
     
     @Override
     public void run() {
-
-        Socket socket;
         try {
-            socket = new Socket(Settings.IRC_SERVER, Settings.IRC_PORT);
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), "UTF-8"));
-
             // Log on to the server.
-            writer.write("PASS oauth:"+ tc.getAuthToken() +"\r\n");
-            writer.write("NICK " + tc.getUser().getName().toLowerCase() + "\r\n");
-            writer.flush();
-
+            sendLine("PASS oauth:"+ tc.getAuthToken() +"\r\n");
+            sendLine("NICK " + tc.getUser().getName().toLowerCase() + "\r\n");
+            sendLine("CAP REQ :twitch.tv/commands\r\n");
             // Read lines from the server until it tells us we have connected.
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                if (line.indexOf("004") >= 0) {
-                    // We are now logged in.
-                    System.out.println("----- LOGGED IN -----");
-                    break;
-                } else if (line.indexOf("433") >= 0) {
-                    System.out.println("Nickname is already in use.");
-                    return;
-                } else {
-                    System.out.println(line.toString());
-                }
-            }
+            if(!connect()) { return; }
 
             // Join the channel.
-            writer.write("JOIN #" + tc.getUser().getName().toLowerCase() + "\r\n");
-//            writer.write("PRIVMSG #"+ tc.getUser().getName().toLowerCase() +" BotTest\r\nS");
-            writer.flush();
+            sendLine("JOIN #" + tc.getUser().getName().toLowerCase() + "\r\n");
 
             // Keep reading lines from the server.
-            while ((line = reader.readLine()) != null) {
-                if (line.toUpperCase().startsWith("PING ")) {
-                    // We must respond to PINGs to avoid being disconnected.
-//                    System.out.println("----- PONG ("+line.substring(6)+") -----");
-                    writer.write("PONG " + line.substring(6) + "\r\n");
-//                    writer.write("PRIVMSG " + CHANNEL + " :I got pinged!\r\n");
-                    writer.flush();
-                } else {
-                    // Print the raw line received by the bot.
-//                    System.out.println(line);
-                    drawLine(line);
-                }
+            listen();
+        } catch(IOException ignored) {
+        } finally {
+            close();
+        }
+    }
+    
+    
+    
+    private boolean connect() throws IOException {
+        String line;
+        while ((line = reader.readLine()) != null) {
+            /*
+             * if (line.indexOf("433") >= 0)
+             * Error code for "nickname already in use"
+             */
+            if (line.contains("004")) {
+                return true;
             }
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
         }
+        return false;
+    }
+    
+    public void diconnect() {
+        close();
+    }
+    
+    private void close() {
+        try {
+            if(socket != null)
+                socket.close();
+            if(reader != null)
+                reader.close();
+            if(writer != null)
+                writer.close();
+        } catch (IOException ignored) {
+        }
+    }
+    
+    private void sendLine(String line) throws IOException {
+        writer.write(line);
+        writer.flush();
+    }
+    
+    public void sendMessage(String channel, String msg) throws IOException {
+        if(!msg.substring(0, 1).equalsIgnoreCase("/")) {
+            sendLine(String.format("PRIVMSG #%s :%s\r\n", channel, msg));
+            drawLine(tc.getUser().getName(), msg);
+        } else {
+            sendLine(String.format("NAMES #%s\r\n", channel));
+            sendLine(String.format("NAMES\r\n"));
+        }
+    }
 
-
-
-
-
+    public void sendMessage(String msg) throws IOException {
+        sendMessage(tc.getChannel().getName().toLowerCase(), msg);
     }
     
     
+    private void listen() throws IOException {
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            if (line.toUpperCase().startsWith("PING ")) {
+                // We must respond to PINGs to avoid being disconnected.
+                sendLine("PONG " + line.substring(6) + "\r\n");
+            } else {
+                // Print the raw line received by the bot.
+                System.out.println(line);
+                drawLine(line);
+            }
+        }
+    }
     
-    private void drawLine(final String line) {
+    
+    private void drawLine(String line) {
         if(line.contains("PRIVMSG")) {
-            String msgLine = line.split("PRIVMSG")[1];
-            String user = msgLine.split(" :")[0].replace(" #", "");
-            String msg = msgLine.split(" :")[1];
-            String chatLine = "["+user+"]: "+msg;
-            new Thread(() -> Platform.runLater( () -> tc.getApp().updateChat( chatLine ) )).start();
+            String user = line.split("!", 2)[0].replace(":", "");
+            String msg = line.split(" :", 2)[1];
+            new Thread(() -> Platform.runLater( () -> tc.getApp().updateChat( ChatLine.of(user, msg) ) )).start();
         }
     }
     
+    private void drawLine(String user, String msg) {
+        new Thread(() -> Platform.runLater( () -> tc.getApp().updateChat( ChatLine.of(user, msg) ) )).start();
+    }
     
     
 

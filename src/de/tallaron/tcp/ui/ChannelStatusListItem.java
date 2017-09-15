@@ -11,12 +11,11 @@ import de.tallaron.tcp.entity.Status;
 import de.tallaron.tcp.lambda.TCPCaller;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 
 /**
@@ -31,6 +30,7 @@ public class ChannelStatusListItem {
         StackPane nodeStack = new StackPane();
         
         Label normField = new Label(s.toString());
+        normField.setMaxWidth(Double.MAX_VALUE);
         TextField editField = new TextField(s.toString());
 
         TCPCaller toggleVisibility = () -> nodeStack.getChildren().forEach( (e) -> e.setVisible(!e.isVisible()) ); //ListItem Scope
@@ -40,44 +40,42 @@ public class ChannelStatusListItem {
         
         HBox norm = new HBox(
             createButton(tc, "+", true, selectStatus),
-            createNode(normField),
+            normField,
             createButton(tc, "E", true, toggleVisibility),
             createButton(tc, "D", true, deleteStatus)
         );
+        HBox.setHgrow(normField, Priority.ALWAYS);
         norm.setPadding(new Insets(0,0,0,0));
-        norm.setSpacing(5);
+        norm.setSpacing(3);
         norm.setVisible(true);
         
         HBox edit = new HBox(
             createButton(tc, "", false, () -> {}),
-            createNode(editField),
+            editField,
             createButton(tc, "S", true, updateStatus),
             createButton(tc, "X", true, toggleVisibility)
         );
+        HBox.setHgrow(editField, Priority.ALWAYS);
         edit.setPadding(new Insets(0,0,0,0));
-        edit.setSpacing(5);
+        edit.setSpacing(3);
         edit.setVisible(false);
                 
-        
         nodeStack.getChildren().addAll(norm,edit);
         
         box.getChildren().add(nodeStack);
+        HBox.setHgrow(nodeStack, Priority.ALWAYS);
         return box;
     }
 
     private static Button createButton(TwitchController tc, String btnText, boolean visible, TCPCaller caller) {
         Button btn = new Button(btnText);
-        btn.setPrefWidth(30);
+        btn.setMinWidth(25);
+        btn.setPrefWidth(25);
         btn.setVisible(visible);
         btn.setOnAction((ActionEvent event) -> {
             caller.call();
         });
         return btn;
-    }
-    
-    private static Node createNode(Node n) {
-        ((Control)n).setPrefWidth(250);
-        return n;
     }
     
 }

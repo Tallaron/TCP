@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 
 public class ChannelStatusAddForm {
     
@@ -14,7 +15,6 @@ public class ChannelStatusAddForm {
         HBox box = new HBox();
         box.setSpacing(5);
         TextField input = new TextField();
-        input.setPrefWidth(250);
         Button btnAddStatus = new Button("Add Status");
         
         btnAddStatus.setOnAction((ActionEvent event) -> {
@@ -24,6 +24,7 @@ public class ChannelStatusAddForm {
         });
 
         box.getChildren().addAll(input, btnAddStatus);
+        HBox.setHgrow(input, Priority.ALWAYS);
         return box;
     }
 

@@ -8,6 +8,7 @@ package de.tallaron.tcp;
 import de.tallaron.tcp.controller.TwitchController;
 import de.tallaron.tcp.ui.ConnectButton;
 import de.tallaron.tcp.menu.NavMenu;
+import de.tallaron.tcp.ui.ChannelStatusPane;
 import de.tallaron.tcp.ui.ChatPane;
 import de.tallaron.tcp.ui.ContentPane;
 import de.tallaron.tcp.ui.DisconnectButton;
@@ -21,6 +22,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -46,8 +48,8 @@ public class App extends Application {
     private final TitledPane ERROR_PANE = ContentPane.getNode("Error");
     private final TitledPane USER_INFO_PANE = ContentPane.getNode("User Info");
     private final TitledPane CHANNEL_INFO_PANE = ContentPane.getNode("Channel::Info");
-    private final TitledPane CHANNEL_STATUS_PANE = ContentPane.getNode("Channel::Status");
-    private final TitledPane CHAT_PANE = ChatPane.getNode("Chat");
+    private final ChannelStatusPane CHANNEL_STATUS_PANE = new ChannelStatusPane("Channel::Status", true, tc);
+    private final ChatPane CHAT_PANE = new ChatPane("Chat", true, tc);
     //RIGHT
     private final TitledPane USERS_PANE = UserPane.getNode("Users", false);
     //BOTTOM
@@ -57,7 +59,8 @@ public class App extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-        init_tc();
+        init_tc(); //initialize TwitchController
+        
         
         STACK_PANE.getChildren().addAll(
                 WELCOME_PANE,
@@ -65,17 +68,18 @@ public class App extends Application {
                 ERROR_PANE,
                 USER_INFO_PANE,
                 CHANNEL_INFO_PANE,
-                CHANNEL_STATUS_PANE,
-                CHAT_PANE
+                CHANNEL_STATUS_PANE.getNode(),
+                CHAT_PANE.getNode()
         );
         STACK_PANE.setAlignment(Pos.TOP_CENTER);
+        STACK_PANE.getChildren().forEach((node) -> ((TitledPane)node).prefHeightProperty().bind(screen.heightProperty()));
         setContentFocus(WELCOME_PANE); //set default content for startup
         
         NAV.addElements(
             ToggleButton.getNode(this, USER_INFO_PANE),
             ToggleButton.getNode(this, CHANNEL_INFO_PANE),
-            ToggleButton.getNode(this, CHANNEL_STATUS_PANE),
-            ToggleButton.getNode(this, CHAT_PANE)
+            ToggleButton.getNode(this, CHANNEL_STATUS_PANE.getNode()),
+            ToggleButton.getNode(this, CHAT_PANE.getNode())
         );
         
         screen.setTop(ConnectButton.getNode(this));
@@ -170,16 +174,14 @@ public class App extends Application {
         loadChannel();
     }
     
-    public void updateChat(String line) {
+    public void updateChat(Node line) {
         if(line != null) {
-            Label newLine = new Label(line);
-//            newLine.setMaxWidth(450);
-            newLine.setWrapText(true);
-            ((VBox)CHAT_PANE.getContent()).getChildren().add( newLine );
+            CHAT_PANE.addLine(line);
         }
     }
     
     private void init_tc() {
+        tc.stopIRCSession();
         tc.setApp(this);
         tc.setError(false);
         tc.setAuthCode(null);
@@ -195,7 +197,7 @@ public class App extends Application {
     
     
     public void setContentFocus(Node n) {
-        STACK_PANE.getChildren().forEach((e) -> ((TitledPane)e).setVisible( e.equals(n) ));
+        STACK_PANE.getChildren().forEach((e) -> e.setVisible( e.equals(n) ));
     }
     
     
